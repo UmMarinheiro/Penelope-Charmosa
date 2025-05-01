@@ -1,6 +1,6 @@
 # Penelope-Charmosa
 
-Código da Penelope Charmosa, um robô de sumô desenvolvido como projeto final da máteria "Materiais de Micro e Nano tecnologia" da turma 2024.2 ministrada pelo Prof. Ruy Atlafim.
+Código da Penelope Charmosa, um robô de sumô desenvolvido como projeto final da máteria "Materiais de Micro e Nano tecnologia" da turma 2024.2 do curso de graduação de Engenharia da Computação da UFPB ministrada pelo Prof. Ruy Atlafim.
 
 O robô foi desenvolvido por:
 
