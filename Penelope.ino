@@ -15,6 +15,11 @@
 #define sensorB A2
 #define sensorT A1
 
+#define distance 70
+
+double rangeA = 0;
+double rangeB = 0;
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(IN1,OUTPUT);
@@ -58,6 +63,32 @@ void stop()
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,LOW);
+}
+void spin()
+{
+  digitalWrite(IN1,HIGH);
+  digitalWrite(IN2,LOW);
+  digitalWrite(IN3,HIGH);
+  digitalWrite(IN4,LOW);
+}
+void scan()
+{
+  spin();
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
+  
+  digitalWrite(trigA,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigA,LOW);
+  rangeA = pulseIn(echoA,HIGH);
+
+  digitalWrite(trigB,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigB,LOW);
+  rangeB = pulseIn(echoB,HIGH);
+
+  rangeA = ((rangeA * 340) / 2) / 100;
+  rangeB = ((rangeB * 340) / 2) / 100;
 }
 void loop() 
 {
