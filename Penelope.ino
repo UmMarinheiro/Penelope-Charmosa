@@ -14,11 +14,16 @@
 #define sensorA A3
 #define sensorB A2
 #define sensorT A1
+#define sensorIntensity 300
+#define setTime 1000
 
 #define distance 70
 
 double rangeA = 0;
 double rangeB = 0;
+unsigned double tempo = 0;
+bool lineMode false;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -64,16 +69,22 @@ void stop()
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,LOW);
 }
-void spin()
+void spin_left()
 {
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
 }
+void spin_right()
+{
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,HIGH);
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,HIGH);
+}
 void scan()
 {
-  spin();
   analogWrite(ENA, 150);
   analogWrite(ENB, 150);
   
@@ -89,6 +100,41 @@ void scan()
 
   rangeA = ((rangeA * 340) / 2) / 100;
   rangeB = ((rangeB * 340) / 2) / 100;
+  
+  if(rangeA < distance || rangeB < distance) {
+	forward();
+  } else {
+	spin_right();
+  }
+}
+
+void line_detector()
+{
+	if (analogRead(sensorA) < sensorIntensity){
+		spin_right();
+		lineMode = true; // Muda para o modo que será realizado pelo carro
+		if (tempo == 0) //Pega o tempo atual do millis pra começar a contar
+			tempo = millis();
+		
+	} else if (analogRead(sensorB) < sensorIntensity){
+		spin_left();
+		lineMode = true;
+		if (tempo == 0)
+			tempo = millis();
+		
+	} else if (analogRead(sensorT) < sensorIntensity){
+		forward();
+	}
+	if (lineMode == true) { // Outro modo
+		if (millis() - tempo >= setTime && millis() - tempo < setTime + 2000) {
+			forward();
+		}
+		if (millis() - tempo >= setTime + 2000) {
+			scan();
+			lineMode = false;
+			tempo = 0;
+		}
+	}
 }
 void loop() 
 {
