@@ -1,7 +1,7 @@
-#define IN1 4
-#define IN2 5
-#define IN3 6
-#define IN4 7
+#define IN1 6
+#define IN2 7
+#define IN3 4
+#define IN4 5
 
 #define ENA 10
 #define ENB 11
@@ -24,75 +24,72 @@ double rangeB = 0;
 bool lineMode = false;
 unsigned int tempo = 0;
 
-void forward()
+void forwardA()
+{
+  digitalWrite(IN1,HIGH);
+  digitalWrite(IN2,LOW);
+}
+void forwardB()
+{
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,HIGH);
+}
+void backA()
 {
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
+}
+void backB()
+{
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
+}
+void stopA()
+{
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,LOW);
+}
+void stopB()
+{
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,LOW);
+}
+
+void forward()
+{
+  forwardA();
+  forwardB();
 }
 void back()
 {
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,HIGH);
+  backA();
+  backB();
 }
 void stop()
 {
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,LOW);
+  stopA();
+  stopB();
 }
-void spin_left()
+void spin_A()
 {
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,HIGH);
-  digitalWrite(IN4,LOW);
+  backA();
+  forwardB();
 }
-void spin_right()
+void spin_B()
 {
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,HIGH);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,HIGH);
-}
-void scan()
-{
-  analogWrite(ENA, 150);
-  analogWrite(ENB, 150);
-  
-  digitalWrite(trigA,HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigA,LOW);
-  rangeA = pulseIn(echoA,HIGH);
-
-  digitalWrite(trigB,HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigB,LOW);
-  rangeB = pulseIn(echoB,HIGH);
-
-  rangeA = ((rangeA * 340) / 2) / 10000;
-  rangeB = ((rangeB * 340) / 2) / 10000;
-  
-  if(rangeA < distance || rangeB < distance) {
-	forward();
-  } else {
-	spin_right();
-  }
+  forwardA();
+  backB();
 }
 
 void line_detector()
 {
 	if (analogRead(sensorA) > sensorIntensity){
-		spin_right();
+		spin_A();
 		lineMode = true; // Muda para o modo que será realizado pelo carro
 		tempo = millis();
 		
 	} else if (analogRead(sensorB) > sensorIntensity){
-		spin_left();
+		spin_B();
 		lineMode = true;
 		tempo = millis();
 		
@@ -155,21 +152,21 @@ void LineSensorTest()
   int read;
   do
   {
-    read = analogRead(sensorA) > sensorIntensity;
+    read = analogRead(sensorA);
     Serial.println("LineSensorTestA: ");
     Serial.println(read);
   }while(read > sensorIntensity);
   
   do
   {
-    int read = analogRead(sensorB) > sensorIntensity;
+    int read = analogRead(sensorB);
     Serial.println("LineSensorTestB: ");
     Serial.println(read);
   }while(read > sensorIntensity);
 
   do
   {
-    int read = analogRead(sensorT) > sensorIntensity;
+    int read = analogRead(sensorT);
     Serial.println("LineSensorTestA: ");
     Serial.println(read);
   }while(read > sensorIntensity);
@@ -199,6 +196,28 @@ void TestAll()
   delay(1000);
 }
 
+
+void scan()
+{ 
+  rangeA = ReadUltrasonicA();
+  rangeB = ReadUltrasonicB();
+  
+  switch((rangeA < distance)*2 + (rangeB < distance))
+  {
+    case 3:
+      forward(); // 
+      break;
+    case 0:
+      spin_A(); // Procurar
+      break;
+    case 2:
+      spin_A(); // A detectou girar naquela direcao
+      break;
+    case 1:
+      spin_B(); // B detectou girar naquela direcao
+      break;
+  }
+}
 
 void setup() {
   Serial.begin(9600);
@@ -231,9 +250,10 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   //line_detector();
+  scan();
   Serial.print("UltrasonicA: ");
   Serial.print(ReadUltrasonicA());
-  Serial.print(" UltrassonicB");
+  Serial.print(" UltrassonicB: ");
   Serial.print(ReadUltrasonicB());
   Serial.println();
 }
