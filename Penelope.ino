@@ -15,14 +15,14 @@
 #define sensorB A2
 #define sensorT A1
 #define sensorIntensity 300
-#define setTime 1000
+#define setTime 2000
 
 #define distance 70
 
 double rangeA = 0;
 double rangeB = 0;
-unsigned double tempo = 0;
-bool lineMode false;
+unsigned int tempo = 0;
+bool lineMode = false;
 
 
 void setup() {
@@ -98,8 +98,8 @@ void scan()
   digitalWrite(trigB,LOW);
   rangeB = pulseIn(echoB,HIGH);
 
-  rangeA = ((rangeA * 340) / 2) / 100;
-  rangeB = ((rangeB * 340) / 2) / 100;
+  rangeA = ((rangeA * 340) / 2) / 10000;
+  rangeB = ((rangeB * 340) / 2) / 10000;
   
   if(rangeA < distance || rangeB < distance) {
 	forward();
@@ -110,13 +110,13 @@ void scan()
 
 void line_detector()
 {
-	if (analogRead(sensorA) < sensorIntensity){
+	if (analogRead(sensorA) > sensorIntensity){
 		spin_right();
 		lineMode = true; // Muda para o modo que será realizado pelo carro
 		if (tempo == 0) //Pega o tempo atual do millis pra começar a contar
 			tempo = millis();
 		
-	} else if (analogRead(sensorB) < sensorIntensity){
+	} else if (analogRead(sensorB) > sensorIntensity){
 		spin_left();
 		lineMode = true;
 		if (tempo == 0)
