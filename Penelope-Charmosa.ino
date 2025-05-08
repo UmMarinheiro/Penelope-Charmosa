@@ -14,9 +14,9 @@
 #define sensorA A2
 #define sensorB A3
 #define sensorT A1
-#define setTime 2000
+#define setTime 1000
 
-#define distance 20
+#define distance 50
 
 double rangeA = 0;
 double rangeB = 0;
@@ -25,8 +25,8 @@ unsigned int tempo = 0;
 
 void forwardA()
 {
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,HIGH);
 }
 void forwardB()
 {
@@ -35,8 +35,8 @@ void forwardB()
 }
 void backA()
 {
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,HIGH);
+  digitalWrite(IN1,HIGH);
+  digitalWrite(IN2,LOW);
 }
 void backB()
 {
@@ -203,20 +203,13 @@ void scan()
   rangeA = ReadUltrasonicA();
   rangeB = ReadUltrasonicB();
 
-  switch((rangeA < distance)*2 + (rangeB < distance))
+  if((rangeA < distance) || (rangeB < distance))
   {
-    case 3:
-      forward(); // 
-      break;
-    case 0:
-      spin_A(); // Procurar
-      break;
-    case 2:
-      spin_A(); // A detectou girar naquela direcao
-      break;
-    case 1:
-      spin_B(); // B detectou girar naquela direcao
-      break;
+    forward();
+  }
+  else
+  {
+    spin_A(); // Procurar
   }
 }
 
@@ -244,13 +237,37 @@ void setup() {
   analogWrite(ENA,200);
   analogWrite(ENB,200);
 
+  delay(5000);
   //TestAll();
 }
 
 void loop() 
 {
-  // put your main code here, to run repeatedly:
-  //line_detector();
+
+  rangeA = ReadUltrasonicA();
+  rangeB = ReadUltrasonicB();
+
+  if((rangeA < distance) || (rangeB < distance))
+  {
+    forward();
+  }
+  else
+  {
+    if(digitalRead(sensorA))
+    {
+      spin_B();
+      delay(setTime);
+    }
+    else if(digitalRead(sensorB))
+    {
+      spin_A();
+      delay(setTime);
+    }
+    else
+    {
+      spin_A(); // Procurar
+    }
+  }
   scan();
 }
 // arduino-cli compile --fqbn arduino:avr:uno .     ------------ Compilar
