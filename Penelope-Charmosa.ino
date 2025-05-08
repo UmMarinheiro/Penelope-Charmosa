@@ -1,5 +1,5 @@
-#define IN1 6
-#define IN2 7
+#define IN1 7
+#define IN2 6
 #define IN3 4
 #define IN4 5
 
@@ -11,13 +11,12 @@
 #define trigB 8
 #define echoB 9
 
-#define sensorA A3
-#define sensorB A2
+#define sensorA A2
+#define sensorB A3
 #define sensorT A1
-#define sensorIntensity 300
 #define setTime 2000
 
-#define distance 70
+#define distance 20
 
 double rangeA = 0;
 double rangeB = 0;
@@ -72,6 +71,7 @@ void stop()
 }
 void spin_A()
 {
+  //stopA();
   backA();
   forwardB();
 }
@@ -79,21 +79,22 @@ void spin_B()
 {
   forwardA();
   backB();
+  //stopB();
 }
 
 void line_detector()
 {
-	if (analogRead(sensorA) > sensorIntensity){
+	if (analogRead(sensorA)){
 		spin_A();
 		lineMode = true; // Muda para o modo que será realizado pelo carro
 		tempo = millis();
 		
-	} else if (analogRead(sensorB) > sensorIntensity){
+	} else if (analogRead(sensorB)){
 		spin_B();
 		lineMode = true;
 		tempo = millis();
 		
-	} else if (analogRead(sensorT) > sensorIntensity){
+	} else if (analogRead(sensorT)){
 		forward();
 	}
 	if (lineMode == true) { // Outro modo
@@ -119,7 +120,7 @@ float ReadUltrasonicB()
   digitalWrite(trigB,HIGH);
   delayMicroseconds(10);
   digitalWrite(trigB,LOW);
-  return ((pulseIn(echoA,HIGH) * 340) / 2) / 10000;
+  return ((pulseIn(echoB,HIGH) * 340) / 2) / 10000;
 }
 
 void MotorTest()
@@ -136,14 +137,14 @@ void UltrassonicTest()
   do
   {
     float range = ReadUltrasonicA();
-    Serial.println("UltrassonicTestA: ");
+    Serial.print("UltrassonicTestA: ");
     Serial.println(range);
   }while(rangeA > 20);
   
   do
   {
     float range = ReadUltrasonicB();
-    Serial.println("UltrassonicTestB: ");
+    Serial.print("UltrassonicTestB: ");
     Serial.println( range);
   }while( range > 20);
 }
@@ -152,24 +153,24 @@ void LineSensorTest()
   int read;
   do
   {
-    read = analogRead(sensorA);
-    Serial.println("LineSensorTestA: ");
+    read = digitalRead(sensorA);
+    Serial.print("LineSensorTestA: ");
     Serial.println(read);
-  }while(read > sensorIntensity);
+  }while(!read);
   
   do
   {
-    int read = analogRead(sensorB);
-    Serial.println("LineSensorTestB: ");
+    read = digitalRead(sensorB);
+    Serial.print("LineSensorTestB: ");
     Serial.println(read);
-  }while(read > sensorIntensity);
+  }while(!read);
 
   do
   {
-    int read = analogRead(sensorT);
-    Serial.println("LineSensorTestA: ");
+    read = digitalRead(sensorT);
+    Serial.print("LineSensorTestT: ");
     Serial.println(read);
-  }while(read > sensorIntensity);
+  }while(!read);
   
 }
 
@@ -201,7 +202,7 @@ void scan()
 { 
   rangeA = ReadUltrasonicA();
   rangeB = ReadUltrasonicB();
-  
+
   switch((rangeA < distance)*2 + (rangeB < distance))
   {
     case 3:
@@ -243,7 +244,7 @@ void setup() {
   analogWrite(ENA,200);
   analogWrite(ENB,200);
 
-  TestAll();
+  //TestAll();
 }
 
 void loop() 
@@ -251,11 +252,6 @@ void loop()
   // put your main code here, to run repeatedly:
   //line_detector();
   scan();
-  Serial.print("UltrasonicA: ");
-  Serial.print(ReadUltrasonicA());
-  Serial.print(" UltrassonicB: ");
-  Serial.print(ReadUltrasonicB());
-  Serial.println();
 }
 // arduino-cli compile --fqbn arduino:avr:uno .     ------------ Compilar
 // arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno .  ------------ Upload
